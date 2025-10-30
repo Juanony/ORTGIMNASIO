@@ -40,82 +40,199 @@ A comprehensive ASP.NET MVC application for managing gym memberships, attendance
 
 ## Technology Stack
 
-- **Framework**: ASP.NET Core 8.0 MVC
-- **Database**: SQL Server with Entity Framework Core
+- **Framework**: ASP.NET Core 9.0 MVC
+- **Database**: SQLite with Entity Framework Core
 - **Authentication**: ASP.NET Core Identity
 - **Frontend**: Bootstrap 5, Bootstrap Icons
 - **JavaScript**: Vanilla JS with jQuery for validation
 
 ## Prerequisites
 
-- .NET 8.0 SDK or later
-- SQL Server (LocalDB, Express, or full version)
-- Visual Studio 2022 or Visual Studio Code
-- Git (optional)
+Before starting, ensure you have the following installed:
+
+### 1. Install .NET SDK
+
+#### macOS (using Homebrew - Recommended):
+```bash
+# Install Homebrew if you don't have it
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install .NET SDK
+brew install --cask dotnet-sdk
+
+# Verify installation
+dotnet --version
+```
+
+#### macOS (Official Installer):
+1. Visit https://dotnet.microsoft.com/download
+2. Download the .NET 9.0 SDK installer for macOS
+3. Run the downloaded .pkg file
+4. Follow the installation wizard
+5. Verify: `dotnet --version`
+
+#### Windows:
+1. Visit https://dotnet.microsoft.com/download
+2. Download the .NET 9.0 SDK installer
+3. Run the installer and follow the wizard
+4. Verify: `dotnet --version`
+
+#### Linux (Ubuntu/Debian):
+```bash
+# Add Microsoft package repository
+wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+
+# Install .NET SDK
+sudo apt-get update
+sudo apt-get install -y dotnet-sdk-9.0
+
+# Verify installation
+dotnet --version
+```
+
+### 2. Install Entity Framework Core Tools
+
+After installing .NET SDK, install the EF Core CLI tools:
+
+```bash
+# Install globally
+dotnet tool install --global dotnet-ef
+
+# Verify installation
+dotnet ef --version
+```
+
+**If `dotnet ef` command is not found**, add the tools directory to your PATH:
+
+#### macOS/Linux:
+```bash
+# Add to PATH
+export PATH="$PATH:$HOME/.dotnet/tools"
+
+# Make it permanent (for zsh)
+echo 'export PATH="$PATH:$HOME/.dotnet/tools"' >> ~/.zshrc
+source ~/.zshrc
+
+# For bash users
+echo 'export PATH="$PATH:$HOME/.dotnet/tools"' >> ~/.bash_profile
+source ~/.bash_profile
+
+# Verify
+dotnet ef --version
+```
+
+#### Windows (PowerShell):
+```powershell
+# The tools are usually automatically added to PATH
+# If not, add manually:
+$env:Path += ";$env:USERPROFILE\.dotnet\tools"
+
+# Verify
+dotnet ef --version
+```
+
+### 3. Optional Tools
+- **Visual Studio 2022** or **Visual Studio Code** (recommended)
+- **Git** (for version control)
 
 ## Installation & Setup
 
-### 1. Clone or Download the Project
+### Step 1: Clone or Download the Project
 
 ```bash
 cd GymMembershipApp
 ```
 
-### 2. Configure Database Connection
+### Step 2: Verify Database Configuration
 
-Edit the `appsettings.json` file and update the connection string according to your SQL Server setup:
+The project is configured to use **SQLite** by default (no additional database server required).
 
-For LocalDB:
+The connection string in `appsettings.json` should be:
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=GymMembershipDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+  "DefaultConnection": "Data Source=GymMembership.db"
 }
 ```
 
-For SQL Server with authentication:
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost,1433;Database=GymMembershipDb;User Id=sa;Password=YourPassword;TrustServerCertificate=true;MultipleActiveResultSets=true"
-}
-```
+**Note**: If you prefer SQL Server, you'll need to:
+1. Install SQL Server
+2. Change the connection string in `appsettings.json`
+3. Update `Program.cs` to use `UseSqlServer` instead of `UseSqlite`
+4. Change the NuGet package from `Microsoft.EntityFrameworkCore.Sqlite` to `Microsoft.EntityFrameworkCore.SqlServer`
 
-### 3. Install Dependencies
+### Step 3: Install Dependencies
 
 ```bash
 dotnet restore
 ```
 
-### 4. Create and Setup Database
+This will download all required NuGet packages.
+
+### Step 4: Create and Setup Database
 
 Run the following commands to create the database and apply migrations:
 
 ```bash
+# Create migration files
 dotnet ef migrations add InitialCreate
+
+# Apply migrations and create database
 dotnet ef database update
 ```
 
-This will:
-- Create the database
-- Create all necessary tables (Members, Attendances, Payments, MembershipPlans, AspNetUsers, etc.)
-- Seed initial membership plan data (Monthly, Quarterly, Annual)
+**What this does:**
+- Creates the SQLite database file `GymMembership.db` in the project folder
+- Creates all necessary tables (Members, Attendances, Payments, MembershipPlans, AspNetUsers, etc.)
+- Seeds initial membership plan data (Monthly, Quarterly, Annual)
 
-### 5. Run the Application
+**Troubleshooting EF Commands:**
+If you get "command not found" errors:
+```bash
+# Check if dotnet-ef is installed
+dotnet tool list -g
+
+# If not listed, install it
+dotnet tool install --global dotnet-ef
+
+# If installed but not working, update it
+dotnet tool update --global dotnet-ef
+
+# Verify PATH includes ~/.dotnet/tools (see Prerequisites section)
+```
+
+### Step 5: Run the Application
 
 ```bash
 dotnet run
 ```
 
-Or press F5 in Visual Studio.
+Or press **F5** in Visual Studio / Visual Studio Code.
 
-The application will be available at:
-- HTTPS: `https://localhost:5001`
-- HTTP: `http://localhost:5000`
+The application will start and display:
+```
+Now listening on: http://localhost:5000
+```
 
-### 6. Create First User
+**The application is now running!** Open your browser to:
+- **HTTP**: http://localhost:5000
+- **HTTPS**: https://localhost:5001 (if configured)
 
-1. Navigate to the registration page
-2. Create an admin account
-3. Use this account to access all features
+To stop the application, press **Ctrl+C** in the terminal.
+
+### Step 6: Create First User
+
+1. Open http://localhost:5000 in your browser
+2. Click on **"Register"** in the navigation bar
+3. Fill in the registration form:
+   - First Name
+   - Last Name
+   - Email
+   - Password (minimum 6 characters, must include uppercase, lowercase, and digit)
+4. Click **"Register"**
+5. You'll be automatically logged in
+6. Start using the application!
 
 ## Default Membership Plans
 
@@ -218,27 +335,109 @@ dotnet ef migrations remove
 
 ## Troubleshooting
 
+### .NET Version Mismatch
+
+**Error**: `You must install or update .NET to run this application`
+
+**Solution**: Check your installed .NET version:
+```bash
+dotnet --version
+```
+
+If you have .NET 9.x but the project targets a different version, the project is already configured for .NET 9.0. If you need to change it:
+1. Open `GymMembershipApp.csproj`
+2. Change `<TargetFramework>netX.0</TargetFramework>` to match your version
+3. Update NuGet package versions accordingly
+4. Run `dotnet restore`
+
+### dotnet-ef Command Not Found
+
+**Error**: `Não foi possível executar porque o comando ou arquivo especificado não foi encontrado`
+
+**Solution**:
+```bash
+# Install EF Core tools
+dotnet tool install --global dotnet-ef
+
+# Add tools to PATH (macOS/Linux)
+export PATH="$PATH:$HOME/.dotnet/tools"
+echo 'export PATH="$PATH:$HOME/.dotnet/tools"' >> ~/.zshrc
+source ~/.zshrc
+
+# Verify
+dotnet ef --version
+```
+
 ### Database Connection Issues
 
+**For SQLite** (default configuration):
+- The database file `GymMembership.db` will be created automatically
+- No additional database server needed
+- Check that the connection string in `appsettings.json` is: `"Data Source=GymMembership.db"`
+
+**For SQL Server**:
 - Verify SQL Server is running
 - Check connection string in `appsettings.json`
 - Ensure database user has proper permissions
+- On macOS, consider using Docker for SQL Server:
+  ```bash
+  docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourPassword123" -p 1433:1433 --name sql-server -d mcr.microsoft.com/mssql/server:2022-latest
+  ```
 
 ### Migration Issues
 
 If you encounter migration errors:
 ```bash
-dotnet ef database drop
-dotnet ef migrations remove
+# Remove the database
+rm GymMembership.db
+
+# Remove migrations folder
+rm -rf Migrations/
+
+# Create fresh migration
 dotnet ef migrations add InitialCreate
+
+# Apply migration
 dotnet ef database update
 ```
 
 ### Port Already in Use
 
-If ports 5000/5001 are in use, modify `launchSettings.json` or use:
+**Error**: `Failed to bind to address http://127.0.0.1:5000`
+
+**Solution**: Change the port in one of these ways:
+
+1. **Command line**:
 ```bash
 dotnet run --urls="http://localhost:5002;https://localhost:5003"
+```
+
+2. **Modify `Properties/launchSettings.json`**:
+```json
+"applicationUrl": "https://localhost:7001;http://localhost:5002"
+```
+
+3. **Find what's using the port**:
+```bash
+# macOS/Linux
+lsof -i :5000
+
+# Kill the process
+kill -9 <PID>
+```
+
+### Build Errors After Package Changes
+
+If you get build errors after changing packages:
+```bash
+# Clean the project
+dotnet clean
+
+# Restore packages
+dotnet restore
+
+# Rebuild
+dotnet build
 ```
 
 ## Security Notes
