@@ -1,0 +1,118 @@
+@model Member
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<h1 class="mb-4"><i class="bi bi-pencil"></i> Edit Member</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <h5 class="mb-3">Personal Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DateOfBirth" class="form-label"></label>
+                            <input asp-for="DateOfBirth" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Emergency Contact</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EmergencyContact" class="form-label"></label>
+                            <input asp-for="EmergencyContact" class="form-control" />
+                            <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EmergencyPhone" class="form-label"></label>
+                            <input asp-for="EmergencyPhone" class="form-control" />
+                            <span asp-validation-for="EmergencyPhone" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Membership Information</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MembershipPlanId" class="form-label"></label>
+                            <select asp-for="MembershipPlanId" class="form-select" asp-items="ViewBag.MembershipPlanId">
+                                <option value="">-- Select Plan --</option>
+                            </select>
+                            <span asp-validation-for="MembershipPlanId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MembershipStartDate" class="form-label"></label>
+                            <input asp-for="MembershipStartDate" class="form-control" />
+                            <span asp-validation-for="MembershipStartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MembershipEndDate" class="form-label"></label>
+                            <input asp-for="MembershipEndDate" class="form-control" />
+                            <span asp-validation-for="MembershipEndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Save Changes
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

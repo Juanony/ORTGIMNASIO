@@ -1,0 +1,133 @@
+@model IEnumerable<Member>
+@{
+    ViewData["Title"] = "Members";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-people-fill"></i> Members</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add New Member
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Name, email, or phone..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Filter by Status</label>
+                <select name="filter" class="form-select">
+                    <option value="">All Members</option>
+                    <option value="active" selected="@(ViewData["StatusFilter"]?.ToString() == "active")">Active</option>
+                    <option value="expired" selected="@(ViewData["StatusFilter"]?.ToString() == "expired")">Expired</option>
+                    <option value="inactive" selected="@(ViewData["StatusFilter"]?.ToString() == "inactive")">Inactive</option>
+                    <option value="paymentdue" selected="@(ViewData["StatusFilter"]?.ToString() == "paymentdue")">Payment Due</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <a asp-action="Index" class="btn btn-secondary w-100">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Members Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Membership Plan</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var member in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@member.FullName</strong>
+                                </td>
+                                <td>@member.Email</td>
+                                <td>@member.PhoneNumber</td>
+                                <td>@(member.MembershipPlan?.Name ?? "N/A")</td>
+                                <td>
+                                    @if (member.MembershipEndDate.HasValue)
+                                    {
+                                        @member.MembershipEndDate.Value.ToString("MMM dd, yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (member.HasActiveMembership)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else if (member.MembershipEndDate < DateTime.Today)
+                                    {
+                                        <span class="badge bg-danger">Expired</span>
+                                    }
+                                    else if (!member.IsActive)
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+
+                                    @if (member.HasPaymentDue)
+                                    {
+                                        <span class="badge bg-warning">Due Soon</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@member.Id" class="btn btn-sm btn-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@member.Id" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@member.Id" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No members found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <p class="mb-0 text-muted">Total: @Model.Count() member(s)</p>
+    </div>
+</div>

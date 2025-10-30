@@ -1,0 +1,162 @@
+@{
+    ViewData["Title"] = "Quick Check-In";
+}
+
+<h1 class="mb-4"><i class="bi bi-box-arrow-in-right"></i> Quick Check-In</h1>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <label for="searchBox" class="form-label h5">Search Member</label>
+                    <input type="text" id="searchBox" class="form-control form-control-lg" placeholder="Enter name, email, or phone number..." autocomplete="off" />
+                    <small class="text-muted">Start typing to search for a member</small>
+                </div>
+
+                <div id="searchResults" class="list-group mb-3" style="display: none;"></div>
+
+                <div id="checkInMessage" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instructions</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Type the member's name, email, or phone number in the search box</li>
+                    <li>Select the member from the search results</li>
+                    <li>Click the check-in button to complete the process</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchBox = document.getElementById('searchBox');
+        const searchResults = document.getElementById('searchResults');
+        const checkInMessage = document.getElementById('checkInMessage');
+        let searchTimeout;
+
+        searchBox.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const searchTerm = this.value.trim();
+
+            if (searchTerm.length < 2) {
+                searchResults.style.display = 'none';
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch('/Attendance/SearchMember', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchTerm)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.members.length > 0) {
+                        displayResults(data.members);
+                    } else {
+                        searchResults.innerHTML = '<div class="list-group-item text-muted">No members found</div>';
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('An error occurred while searching', 'danger');
+                });
+            }, 300);
+        });
+
+        function displayResults(members) {
+            searchResults.innerHTML = '';
+            members.forEach(member => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+
+                const memberInfo = document.createElement('div');
+                memberInfo.innerHTML = `
+                    <strong>${member.fullName}</strong><br>
+                    <small class="text-muted">${member.email}</small>
+                `;
+
+                const badge = document.createElement('span');
+                if (member.hasActiveMembership) {
+                    badge.className = 'badge bg-success';
+                    badge.textContent = 'Active';
+                } else {
+                    badge.className = 'badge bg-danger';
+                    badge.textContent = 'Expired';
+                }
+
+                item.appendChild(memberInfo);
+                item.appendChild(badge);
+
+                item.addEventListener('click', () => checkInMember(member.id, member.fullName, member.hasActiveMembership));
+
+                searchResults.appendChild(item);
+            });
+            searchResults.style.display = 'block';
+        }
+
+        function checkInMember(memberId, memberName, hasActiveMembership) {
+            if (!hasActiveMembership) {
+                showMessage(`Cannot check in ${memberName}. Membership has expired.`, 'danger');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('memberId', memberId);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            fetch('/Attendance/ProcessQuickCheckIn', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    searchBox.value = '';
+                    searchResults.style.display = 'none';
+                    searchResults.innerHTML = '';
+                } else {
+                    showMessage(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred during check-in', 'danger');
+            });
+        }
+
+        function showMessage(message, type) {
+            checkInMessage.className = `alert alert-${type}`;
+            checkInMessage.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i> ${message}`;
+            checkInMessage.style.display = 'block';
+
+            setTimeout(() => {
+                checkInMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+    <form id="hiddenForm">
+        @Html.AntiForgeryToken()
+    </form>
+}
