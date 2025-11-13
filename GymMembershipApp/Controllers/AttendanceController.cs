@@ -133,11 +133,11 @@ namespace GymMembershipApp.Controllers
                      m.PhoneNumber.Contains(searchTerm)))
                 .Select(m => new
                 {
-                    m.Id,
-                    FullName = m.FullName,
-                    m.Email,
-                    m.MembershipEndDate,
-                    HasActiveMembership = m.MembershipEndDate >= DateTime.Today
+                    id = m.Id,
+                    fullName = m.FullName,
+                    email = m.Email,
+                    membershipEndDate = m.MembershipEndDate,
+                    hasActiveMembership = m.MembershipEndDate >= DateTime.Today
                 })
                 .Take(10)
                 .ToListAsync();
