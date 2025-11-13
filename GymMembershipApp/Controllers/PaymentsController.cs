@@ -120,5 +120,23 @@ namespace GymMembershipApp.Controllers
             var plan = await _context.MembershipPlans.FindAsync(id);
             return Json(plan?.Price ?? 0);
         }
+
+        // GET: Payments/DueMembers
+        public async Task<IActionResult> DueMembers()
+        {
+            var today = DateTime.Today;
+            var dueDate = today.AddDays(7);
+
+            var dueMembers = await _context.Members
+                .Include(m => m.MembershipPlan)
+                .Where(m => m.IsActive &&
+                            m.MembershipEndDate.HasValue &&
+                            m.MembershipEndDate >= today &&
+                            m.MembershipEndDate <= dueDate)
+                .OrderBy(m => m.MembershipEndDate)
+                .ToListAsync();
+
+            return View(dueMembers);
+        }
     }
 }
