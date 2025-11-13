@@ -53,7 +53,7 @@
                                     <small class="text-muted">@payment.Member?.Email</small>
                                 </td>
                                 <td>
-                                    <strong class="text-primary">$@payment.Amount.ToString("N2")</strong>
+                                    <strong class="text-primary">$@payment.Amount.ToString("0.00")</strong>
                                 </td>
                                 <td>
                                     @switch (payment.PaymentMethod)
@@ -149,7 +149,7 @@
                     <p class="mb-0 text-muted">Total Pending: @Model.Count() payment(s)</p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <strong>Total Amount: $@Model.Sum(p => p.Amount).ToString("N2")</strong>
+                    <strong>Total Amount: $@Model.Sum(p => p.Amount).ToString("0.00")</strong>
                 </div>
             </div>
         </div>
