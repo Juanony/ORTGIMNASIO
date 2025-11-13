@@ -1,0 +1,92 @@
+@model Payment
+@{
+    ViewData["Title"] = "Create Payment";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create New Payment</h4>
+            </div>
+            <div class="card-body">
+                <form id="paymentForm" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="MemberId" class="form-label">Member</label>
+                        <select asp-for="MemberId" class="form-select" asp-items="ViewBag.MemberId" required>
+                            <option value="">Select Member</option>
+                        </select>
+                        <span asp-validation-for="MemberId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MembershipPlanId" class="form-label">Membership Plan</label>
+                        <select asp-for="MembershipPlanId" class="form-select" asp-items="ViewBag.MembershipPlanId">
+                            <option value="">Select Plan</option>
+                        </select>
+                        <span asp-validation-for="MembershipPlanId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label"></label>
+                        <input asp-for="Amount" class="form-control" required min="0.01" step="0.01" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PaymentMethod" class="form-label"></label>
+                        <select asp-for="PaymentMethod" class="form-select" asp-items="Html.GetEnumSelectList<PaymentMethod>()" required>
+                            <option value="">Select Payment Method</option>
+                        </select>
+                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<PaymentStatus>()" required>
+                            <option value="">Select Status</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TransactionReference" class="form-label"></label>
+                        <input asp-for="TransactionReference" class="form-control" />
+                        <span asp-validation-for="TransactionReference" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Create Payment</button>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            $('#MembershipPlanId').change(function() {
+                var planId = $(this).val();
+                if (planId) {
+                    $.get('/Payments/GetPlanPrice/' + planId, function(price) {
+                        $('#Amount').val(price.toFixed(2));
+                    });
+                }
+            });
+        });
+    </script>
+}

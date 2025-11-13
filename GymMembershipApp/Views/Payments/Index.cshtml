@@ -1,0 +1,82 @@
+@model IEnumerable<Payment>
+@{
+    ViewData["Title"] = "Payments";
+}
+
+<h1>Payments</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Search Filters</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="startDate" class="form-control" value="@ViewData["StartDate"]" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">End Date</label>
+                <input type="date" name="endDate" class="form-control" value="@ViewData["EndDate"]" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Member</label>
+                <select name="memberId" class="form-select" asp-items="ViewBag.Members">
+                    <option value="">All Members</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select" asp-items="Html.GetEnumSelectList<PaymentStatus>()">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Member</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Reference</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.Member.FullName</td>
+                    <td>@(item.MembershipPlan?.Name ?? "-")</td>
+                    <td>@item.Amount.ToString("C")</td>
+                    <td>@item.PaymentMethod</td>
+                    <td>@item.Status</td>
+                    <td>@(item.TransactionReference ?? "-")</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

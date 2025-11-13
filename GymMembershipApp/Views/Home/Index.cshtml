@@ -1,0 +1,253 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var recentCheckIns = ViewData["RecentCheckIns"] as List<Attendance>;
+    var paymentDueList = ViewData["PaymentDueList"] as List<Member>;
+    var recentPayments = ViewData["RecentPayments"] as List<Payment>;
+}
+
+<h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Members</h6>
+                            <h2 class="mb-0">@ViewData["TotalMembers"]</h2>
+                        </div>
+                        <i class="bi bi-people-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Active Members</h6>
+                            <h2 class="mb-0">@ViewData["ActiveMembers"]</h2>
+                        </div>
+                        <i class="bi bi-person-check-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Payment Due</h6>
+                            <h2 class="mb-0">@ViewData["PaymentDueMembers"]</h2>
+                        </div>
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Expired</h6>
+                            <h2 class="mb-0">@ViewData["ExpiredMembers"]</h2>
+                        </div>
+                        <i class="bi bi-person-x-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance & Revenue -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-clock-history"></i> Today's Attendance</h5>
+                    <h3 class="text-primary">@ViewData["TodayCheckIns"]</h3>
+                    <p class="text-muted mb-0">Currently in gym: <strong>@ViewData["CurrentlyInGym"]</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-cash-coin"></i> Monthly Revenue</h5>
+                    <h3 class="text-success">$@String.Format("{0:N2}", ViewData["MonthlyRevenue"])</h3>
+                    <p class="text-muted mb-0">This month</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <a asp-controller="Attendance" asp-action="QuickCheckIn" class="btn btn-lg btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Quick Check-In
+                    </a>
+                    <a asp-controller="Payments" asp-action="Create" class="btn btn-success w-100 mt-2">
+                        <i class="bi bi-plus-circle"></i> New Payment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row g-3">
+        <!-- Recent Check-Ins -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Check-Ins</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (recentCheckIns != null && recentCheckIns.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var checkIn in recentCheckIns)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@checkIn.Member.FullName</strong>
+                                        <br />
+                                        <small class="text-muted">@checkIn.CheckInTime.ToString("HH:mm")</small>
+                                    </div>
+                                    @if (checkIn.CheckOutTime == null)
+                                    {
+                                        <span class="badge bg-success">In Gym</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Checked Out</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted py-3">No check-ins today</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Attendance" asp-action="Today" class="btn btn-sm btn-outline-primary">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Due Members -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Payment Due (Next 7 Days)</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (paymentDueList != null && paymentDueList.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var member in paymentDueList)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@member.FullName</strong>
+                                        <br />
+                                        <small class="text-muted">Expires: @member.MembershipEndDate?.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                    <a asp-controller="Payments" asp-action="Create" asp-route-memberId="@member.Id" class="btn btn-sm btn-success">
+                                        <i class="bi bi-cash"></i> Pay
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted py-3">No payments due</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Payments" asp-action="DueMembers" class="btn btn-sm btn-outline-warning">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="row g-3 mt-1">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Recent Payments</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (recentPayments != null && recentPayments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Member</th>
+                                        <th>Amount</th>
+                                        <th>Plan</th>
+                                        <th>Date</th>
+                                        <th>Method</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in recentPayments)
+                                    {
+                                        <tr>
+                                            <td>@payment.Member.FullName</td>
+                                            <td><strong>$@payment.Amount.ToString("N2")</strong></td>
+                                            <td>@payment.MembershipPlan?.Name</td>
+                                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                            <td><span class="badge bg-info">@payment.PaymentMethod</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted py-3">No recent payments</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Payments" asp-action="Index" class="btn btn-sm btn-outline-success">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <h2>Welcome to Gym Membership Management System</h2>
+        <p class="lead">Please login or register to continue</p>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg me-2">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-person-plus-fill"></i> Register
+        </a>
+    </div>
+}

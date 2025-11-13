@@ -1,0 +1,120 @@
+@model IEnumerable<Attendance>
+@{
+    ViewData["Title"] = "Today's Attendance";
+    var currentlyInGym = Model.Count(a => a.CheckOutTime == null);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-calendar-check"></i> Today's Attendance</h1>
+    <a asp-action="QuickCheckIn" class="btn btn-primary">
+        <i class="bi bi-box-arrow-in-right"></i> Quick Check-In
+    </a>
+</div>
+
+<!-- Statistics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h3 class="mb-0">@Model.Count()</h3>
+                <p class="mb-0">Total Check-Ins Today</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h3 class="mb-0">@currentlyInGym</h3>
+                <p class="mb-0">Currently in Gym</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Table -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Today's Records - @DateTime.Today.ToString("MMMM dd, yyyy")</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Member</th>
+                        <th>Check-In Time</th>
+                        <th>Check-Out Time</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var attendance in Model)
+                        {
+                            <tr class="@(attendance.CheckOutTime == null ? "table-success" : "")">
+                                <td>
+                                    <strong>@attendance.Member.FullName</strong>
+                                    <br />
+                                    <small class="text-muted">@attendance.Member.Email</small>
+                                </td>
+                                <td>@attendance.CheckInTime.ToString("HH:mm")</td>
+                                <td>
+                                    @if (attendance.CheckOutTime.HasValue)
+                                    {
+                                        @attendance.CheckOutTime.Value.ToString("HH:mm")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (attendance.Duration.HasValue)
+                                    {
+                                        @($"{(int)attendance.Duration.Value.TotalHours}h {attendance.Duration.Value.Minutes}m")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (attendance.CheckOutTime.HasValue)
+                                    {
+                                        <span class="badge bg-secondary">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">In Gym</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!attendance.CheckOutTime.HasValue)
+                                    {
+                                        <form asp-action="CheckOut" asp-route-id="@attendance.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success" title="Check Out">
+                                                <i class="bi bi-box-arrow-right"></i> Check Out
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No check-ins today
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
